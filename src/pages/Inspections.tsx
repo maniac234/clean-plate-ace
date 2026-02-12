@@ -17,9 +17,40 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+
+const EVALUATION_SCALE = [
+  { min: 100, label: "EXCELENTE" },
+  { min: 99, label: "ÓTIMO" },
+  { min: 93, label: "ÓTIMO" },
+  { min: 90, label: "ÓTIMO" },
+  { min: 89, label: "SATISFATÓRIO" },
+  { min: 83, label: "SATISFATÓRIO" },
+  { min: 80, label: "SATISFATÓRIO" },
+  { min: 79, label: "REGULAR" },
+  { min: 73, label: "REGULAR" },
+  { min: 70, label: "REGULAR" },
+  { min: 0, label: "INSATISFATÓRIO" },
+];
+
+function getEvaluation(pct: number) {
+  for (const entry of EVALUATION_SCALE) {
+    if (pct >= entry.min) return entry.label;
+  }
+  return "INSATISFATÓRIO";
+}
+
+function getEvaluationColor(label: string) {
+  switch (label) {
+    case "EXCELENTE": return "bg-success text-success-foreground";
+    case "ÓTIMO": return "bg-emerald-500 text-white";
+    case "SATISFATÓRIO": return "bg-yellow-500 text-white";
+    case "REGULAR": return "bg-orange-500 text-white";
+    default: return "bg-destructive text-destructive-foreground";
+  }
+}
 
 export default function Inspections() {
   const { isAdmin } = useAuth();
@@ -38,7 +69,6 @@ export default function Inspections() {
   const saveResult = useSaveVisitResult();
   const updateScore = useUpdateVisitScore();
 
-  // Build a map of results
   const resultMap = new Map(results?.map((r) => [r.inspection_item_id, r]) ?? []);
 
   const handleCreateVisit = async () => {
@@ -59,6 +89,7 @@ export default function Inspections() {
 
     if (!isConforming) {
       setObsDialog({ itemId, obs: resultMap.get(itemId)?.observations ?? "" });
+      return;
     }
 
     try {
@@ -67,7 +98,7 @@ export default function Inspections() {
         inspection_item_id: itemId,
         is_conforming: isConforming,
         score,
-        observations: isConforming ? "" : resultMap.get(itemId)?.observations,
+        observations: "",
       });
     } catch {
       toast.error("Erro ao salvar resultado");
@@ -93,7 +124,6 @@ export default function Inspections() {
     }
   };
 
-  // Recalculate score
   useEffect(() => {
     if (!selectedVisit || !results || !items) return;
     const totalScore = results.reduce((acc, r) => acc + (r.score ?? 0), 0);
@@ -108,6 +138,9 @@ export default function Inspections() {
 
   const totalScore = results?.reduce((a, r) => a + (r.score ?? 0), 0) ?? 0;
   const maxPossible = items?.reduce((a, i) => a + i.points_positive, 0) ?? 0;
+  const percentage = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
+  const evaluationLabel = getEvaluation(percentage);
+  const evaluationColor = getEvaluationColor(evaluationLabel);
 
   return (
     <div className="space-y-6">
@@ -177,18 +210,48 @@ export default function Inspections() {
         </Card>
       )}
 
-      {/* Score bar */}
+      {/* Evaluation Scale */}
       {selectedVisit && (
-        <div className="flex items-center gap-4 rounded-lg border p-4">
-          <span className="text-sm font-medium">Pontuação:</span>
-          <span className={`text-xl font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
-            {totalScore}
-          </span>
-          <span className="text-sm text-muted-foreground">/ {maxPossible} possíveis</span>
-          <Badge variant={totalScore >= 0 ? "default" : "destructive"}>
-            {maxPossible > 0 ? `${Math.round(((totalScore) / maxPossible) * 100)}%` : "—"}
-          </Badge>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">PADRÃO DE AVALIAÇÃO DO CHECK-LIST</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4 rounded-lg border p-4">
+              <span className="text-sm font-medium">Pontuação:</span>
+              <span className={`text-xl font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
+                {totalScore}
+              </span>
+              <span className="text-sm text-muted-foreground">/ {maxPossible} possíveis</span>
+              <span className="text-sm font-medium">({percentage}%)</span>
+              <Badge className={evaluationColor}>{evaluationLabel}</Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm sm:grid-cols-4">
+              <div className="font-semibold">Percentual</div>
+              <div className="font-semibold">Avaliação</div>
+              <div className="hidden font-semibold sm:block">Percentual</div>
+              <div className="hidden font-semibold sm:block">Avaliação</div>
+              {[
+                { pct: "100%", eval: "EXCELENTE" },
+                { pct: "99%", eval: "ÓTIMO" },
+                { pct: "93%", eval: "" },
+                { pct: "90%", eval: "" },
+                { pct: "89%", eval: "SATISFATÓRIO" },
+                { pct: "83%", eval: "" },
+                { pct: "80%", eval: "" },
+                { pct: "79%", eval: "REGULAR" },
+                { pct: "73%", eval: "" },
+                { pct: "70%", eval: "" },
+              ].map((row, i) => (
+                <div key={i} className={`contents ${row.eval ? "font-medium" : "text-muted-foreground"}`}>
+                  <div className="border-b py-1">{row.pct}</div>
+                  <div className="border-b py-1">{row.eval || "—"}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Inspection items */}
@@ -212,12 +275,12 @@ export default function Inspections() {
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">
                       {item.question_number}
                     </span>
                     <div className="flex-1">
                       <p className="text-sm leading-relaxed">{item.description}</p>
-                      <div className="mt-2 flex items-center gap-2">
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
                         <Badge variant="outline" className="text-xs">
                           Peso {item.weight} | +{item.points_positive} / {item.points_negative}
                         </Badge>
@@ -236,21 +299,22 @@ export default function Inspections() {
                       )}
                     </div>
                     {isAdmin && (
-                      <div className="flex gap-1">
-                        <button
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant={result?.is_conforming === true ? "default" : "outline"}
+                          className={result?.is_conforming === true ? "bg-success hover:bg-success/90 text-success-foreground" : ""}
                           onClick={() => handleMark(item.id, true, item)}
-                          className="rounded-lg p-2 transition-colors hover:bg-success/10"
-                          title="Conforme"
                         >
-                          <CheckCircle2 className={`h-5 w-5 ${result?.is_conforming === true ? "text-success" : "text-muted-foreground"}`} />
-                        </button>
-                        <button
+                          OK
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={result?.is_conforming === false ? "destructive" : "outline"}
                           onClick={() => handleMark(item.id, false, item)}
-                          className="rounded-lg p-2 transition-colors hover:bg-destructive/10"
-                          title="Não Conforme"
                         >
-                          <XCircle className={`h-5 w-5 ${result?.is_conforming === false ? "text-destructive" : "text-muted-foreground"}`} />
-                        </button>
+                          Irregular
+                        </Button>
                       </div>
                     )}
                   </div>
