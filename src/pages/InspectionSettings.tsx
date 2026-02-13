@@ -88,7 +88,8 @@ export default function InspectionSettings() {
           <Textarea
             placeholder="Descrição do item de inspeção"
             value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
+            onChange={(e) => setNewDesc(e.target.value.slice(0, 500))}
+            maxLength={500}
           />
           <div className="flex gap-3">
             <Select value={newWeight} onValueChange={setNewWeight}>

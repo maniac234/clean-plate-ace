@@ -334,9 +334,11 @@ export default function Inspections() {
           <Textarea
             placeholder="Descreva as observações relevantes e o que pode melhorar..."
             value={obsDialog?.obs ?? ""}
-            onChange={(e) => setObsDialog((prev) => prev ? { ...prev, obs: e.target.value } : null)}
+            onChange={(e) => setObsDialog((prev) => prev ? { ...prev, obs: e.target.value.slice(0, 1000) } : null)}
+            maxLength={1000}
             rows={5}
           />
+          <p className="text-xs text-muted-foreground text-right">{(obsDialog?.obs ?? "").length}/1000</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setObsDialog(null)}>Cancelar</Button>
             <Button onClick={handleSaveObs}>Salvar</Button>
