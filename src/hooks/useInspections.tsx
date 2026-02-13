@@ -66,9 +66,12 @@ export function useCreateVisit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ branch_id, visit_date, notes }: { branch_id: string; visit_date: string; notes?: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       const { data, error } = await supabase
         .from("visits")
-        .insert({ branch_id, visit_date, notes })
+        .insert({ branch_id, visit_date, notes, inspector_id: user.id })
         .select()
         .single();
       if (error) throw error;
