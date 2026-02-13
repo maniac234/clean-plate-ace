@@ -47,13 +47,15 @@ export default function Branches() {
           <Input
             placeholder="Nome da filial"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value.slice(0, 100))}
+            maxLength={100}
             className="max-w-xs"
           />
           <Input
             placeholder="Responsável (opcional)"
             value={responsible}
-            onChange={(e) => setResponsible(e.target.value)}
+            onChange={(e) => setResponsible(e.target.value.slice(0, 100))}
+            maxLength={100}
             className="max-w-xs"
           />
           <Button onClick={handleAdd}>

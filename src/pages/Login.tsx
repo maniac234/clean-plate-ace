@@ -58,7 +58,8 @@ const Login = () => {
               <Input
                 id="name"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => setFullName(e.target.value.slice(0, 200))}
+                maxLength={200}
                 required
               />
             </div>
