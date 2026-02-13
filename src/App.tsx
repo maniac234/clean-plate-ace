@@ -12,6 +12,7 @@ import Logs from "@/pages/Logs";
 import Charts from "@/pages/Charts";
 import Branches from "@/pages/Branches";
 import InspectionSettings from "@/pages/InspectionSettings";
+import UsersPage from "@/pages/Users";
 import NotFound from "./pages/NotFound";
 import { ReactNode } from "react";
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
             <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
             <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
