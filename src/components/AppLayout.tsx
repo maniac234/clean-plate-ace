@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
-import { LayoutDashboard, ClipboardList, BarChart3, LogOut, Settings, Building2 } from "lucide-react";
+import { LayoutDashboard, ClipboardList, BarChart3, LogOut, Settings, Building2, Users } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -14,6 +14,7 @@ const navItems = [
 
 const adminItems = [
   { to: "/branches", label: "Filiais", icon: Building2 },
+  { to: "/users", label: "Usuários", icon: Users },
   { to: "/settings", label: "Configurações", icon: Settings },
 ];
 
