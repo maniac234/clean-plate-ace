@@ -1,96 +1,127 @@
 import { useState } from "react";
 import { useBranches } from "@/hooks/useBranches";
-import { useVisits } from "@/hooks/useInspections";
+import { useAllVisits } from "@/hooks/useInspections";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine,
+} from "recharts";
+
+const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+function getBarColor(pct: number) {
+  if (pct >= 93) return "#22c55e"; // green
+  if (pct >= 80) return "#f59e0b"; // yellow/amber
+  if (pct >= 70) return "#f97316"; // orange
+  return "#ef4444"; // red
+}
 
 export default function Charts() {
   const { data: branches } = useBranches();
-  const [selectedBranch, setSelectedBranch] = useState("");
-  const { data: visits } = useVisits(selectedBranch);
+  const currentYear = new Date().getFullYear();
+  const [selectedBranch, setSelectedBranch] = useState("all");
+  const [selectedYear, setSelectedYear] = useState(String(currentYear));
+  const { data: visits } = useAllVisits();
 
-  // Aggregate by month - take best score per month
-  const monthlyData = visits?.reduce<Record<string, { total: number; max: number; count: number }>>((acc, v) => {
+  const filteredVisits = visits?.filter((v) => {
     const d = new Date(v.visit_date);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (!acc[key]) acc[key] = { total: 0, max: 0, count: 0 };
-    acc[key].total += v.total_score;
-    acc[key].max += v.max_possible_score;
-    acc[key].count += 1;
-    return acc;
-  }, {});
+    if (d.getFullYear() !== Number(selectedYear)) return false;
+    if (selectedBranch !== "all" && v.branch_id !== selectedBranch) return false;
+    return true;
+  });
 
-  const chartData = monthlyData
-    ? Object.entries(monthlyData)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([month, data]) => {
-          const [y, m] = month.split("-");
-          const label = new Date(Number(y), Number(m) - 1).toLocaleDateString("pt-BR", {
-            month: "short",
-            year: "2-digit",
-          });
-          const pct = data.max > 0 ? Math.round((data.total / data.max) * 100) : 0;
-          return { month: label, percentual: pct };
-        })
-    : [];
+  // Aggregate by month
+  const monthlyMap: Record<number, { total: number; max: number }> = {};
+  filteredVisits?.forEach((v) => {
+    const m = new Date(v.visit_date).getMonth();
+    if (!monthlyMap[m]) monthlyMap[m] = { total: 0, max: 0 };
+    monthlyMap[m].total += v.total_score ?? 0;
+    monthlyMap[m].max += v.max_possible_score ?? 0;
+  });
+
+  const chartData = MONTHS.map((label, idx) => {
+    const d = monthlyMap[idx];
+    const pct = d && d.max > 0 ? Math.round((d.total / d.max) * 100) : 0;
+    return { month: label, percentual: d ? pct : null };
+  });
+
+  const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Evolução Mensal</h1>
-
-      <div className="max-w-xs">
-        <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione a filial" />
-          </SelectTrigger>
-          <SelectContent>
-            {branches?.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Evolução Mensal</h1>
+          <p className="text-sm text-muted-foreground">Percentual de conformidade por mês</p>
+        </div>
+        <div className="flex gap-2">
+          <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Filiais</SelectItem>
+              {branches?.map((b) => (
+                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((y) => (
+                <SelectItem key={y} value={y}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {!selectedBranch && (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-dashed">
-          <p className="text-muted-foreground">Selecione uma filial</p>
+      <div className="rounded-lg border bg-card p-4">
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip
+                formatter={(v: number) => [`${v}%`, "Conformidade"]}
+                cursor={{ fill: "hsl(var(--muted))" }}
+              />
+              <ReferenceLine y={80} stroke="#f59e0b" strokeDasharray="6 4" strokeWidth={1.5} />
+              <Bar dataKey="percentual" radius={[4, 4, 0, 0]} maxBarSize={48}>
+                {chartData.map((entry, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={entry.percentual !== null ? getBarColor(entry.percentual) : "transparent"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-      )}
 
-      {selectedBranch && chartData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Percentual de Conformidade por Mês</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip formatter={(v: number) => [`${v}%`, "Conformidade"]} />
-                  <Bar dataKey="percentual" radius={[4, 4, 0, 0]}>
-                    {chartData.map((entry, idx) => (
-                      <Cell
-                        key={idx}
-                        fill={entry.percentual >= 70 ? "hsl(var(--success))" : "hsl(var(--destructive))"}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {selectedBranch && chartData.length === 0 && (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-dashed">
-          <p className="text-muted-foreground">Nenhum dado disponível para esta filial</p>
+        {/* Legend */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#22c55e" }} />
+            ≥93% Ótimo/Excelente
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+            80-92% Satisfatório
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#f97316" }} />
+            70-79% Regular
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#ef4444" }} />
+            &lt;70% Insuficiente
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 }

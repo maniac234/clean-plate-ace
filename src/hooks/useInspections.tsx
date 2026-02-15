@@ -47,6 +47,20 @@ export function useVisits(branchId?: string) {
   });
 }
 
+export function useAllVisits() {
+  return useQuery({
+    queryKey: ["visits", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("visits")
+        .select("*")
+        .order("visit_date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useVisitResults(visitId?: string) {
   return useQuery({
     queryKey: ["visit_results", visitId],
