@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -20,38 +20,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
+  const checkAdmin = useCallback(async (userId: string) => {
     try {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
-    } catch (err) {
-      console.error("checkAdmin error:", err);
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+      if (error) {
+        console.error("checkAdmin error:", error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(data === true);
+      }
+    } catch {
       setIsAdmin(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
+    // Set up auth listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
+        
         if (session?.user) {
-          await checkAdmin(session.user.id);
+          // Use setTimeout to avoid Supabase deadlock in auth callback
+          setTimeout(() => {
+            if (mounted) {
+              checkAdmin(session.user.id).then(() => {
+                if (mounted) setLoading(false);
+              });
+            }
+          }, 0);
         } else {
           setIsAdmin(false);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
+    // Then get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return;
       setSession(session);
@@ -59,12 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         await checkAdmin(session.user.id);
       }
-      setLoading(false);
+      if (mounted) setLoading(false);
     }).catch(() => {
       if (mounted) setLoading(false);
     });
 
-    // Safety timeout - never stay loading forever
+    // Safety timeout
     const timeout = setTimeout(() => {
       if (mounted) setLoading(false);
     }, 5000);
@@ -74,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkAdmin]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -94,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    setIsAdmin(false);
     await supabase.auth.signOut();
   };
 
