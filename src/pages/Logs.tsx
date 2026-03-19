@@ -22,42 +22,33 @@ function VisitDetailsDialog({ visitId, open, onClose }: { visitId: string; open:
           <DialogTitle className="text-base">Detalhes da Inspeção</DialogTitle>
         </DialogHeader>
 
-        {(!results || results.length === 0) && (
+        <div className="flex items-center gap-3 text-xs">
+          <span className="flex items-center gap-1 text-success font-medium"><CheckCircle className="h-3.5 w-3.5" /> Conformes: {conformes.length}</span>
+          <span className="flex items-center gap-1 text-destructive font-medium"><XCircle className="h-3.5 w-3.5" /> Irregulares: {irregulares.length}</span>
+        </div>
+
+        {sorted.length === 0 && (
           <p className="text-sm text-muted-foreground py-4 text-center">Nenhum resultado registrado.</p>
         )}
 
-        {conformes.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold flex items-center gap-1.5 text-success">
-              <CheckCircle className="h-4 w-4" /> Conformes ({conformes.length})
-            </h3>
-            {conformes.map((r) => (
-              <div key={r.id} className="rounded border border-success/20 bg-success/5 p-2 text-xs">
-                <span className="font-medium">
-                  {r.inspection_items?.question_number}. {r.inspection_items?.description}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {irregulares.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold flex items-center gap-1.5 text-destructive">
-              <XCircle className="h-4 w-4" /> Irregulares ({irregulares.length})
-            </h3>
-            {irregulares.map((r) => (
-              <div key={r.id} className="rounded border border-destructive/20 bg-destructive/5 p-2 text-xs space-y-1">
-                <span className="font-medium">
-                  {r.inspection_items?.question_number}. {r.inspection_items?.description}
-                </span>
-                {r.observations && (
-                  <p className="text-destructive/80 italic">Obs: {r.observations}</p>
+        <div className="space-y-2">
+          {sorted.map((r) => {
+            const ok = r.is_conforming === true;
+            return (
+              <div key={r.id} className={`rounded border p-2 text-xs space-y-1 ${ok ? "border-success/20 bg-success/5" : "border-destructive/20 bg-destructive/5"}`}>
+                <div className="flex items-start gap-1.5">
+                  {ok ? <CheckCircle className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" /> : <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />}
+                  <span className="font-medium">
+                    {r.inspection_items?.question_number}. {r.inspection_items?.description}
+                  </span>
+                </div>
+                {!ok && r.observations && (
+                  <p className="text-destructive/80 italic pl-5">Obs: {r.observations}</p>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </DialogContent>
     </Dialog>
   );
