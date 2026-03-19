@@ -11,8 +11,9 @@ import { CalendarDays, Eye, CheckCircle, XCircle } from "lucide-react";
 function VisitDetailsDialog({ visitId, open, onClose }: { visitId: string; open: boolean; onClose: () => void }) {
   const { data: results } = useVisitResults(visitId);
 
-  const conformes = results?.filter((r) => r.is_conforming === true) ?? [];
-  const irregulares = results?.filter((r) => r.is_conforming === false) ?? [];
+  const sorted = [...(results ?? [])].sort((a, b) => (a.inspection_items?.question_number ?? 0) - (b.inspection_items?.question_number ?? 0));
+  const conformes = sorted.filter((r) => r.is_conforming === true);
+  const irregulares = sorted.filter((r) => r.is_conforming === false);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
