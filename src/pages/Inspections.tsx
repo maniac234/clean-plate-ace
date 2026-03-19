@@ -266,7 +266,7 @@ export default function Inspections() {
               return (
                 <div
                   key={item.id}
-                  className={`rounded-lg border p-4 transition-colors ${
+                  className={`rounded-lg border p-3 transition-colors ${
                     result?.is_conforming === true
                       ? "border-success/30 bg-success/5"
                       : result?.is_conforming === false
@@ -274,50 +274,51 @@ export default function Inspections() {
                       : ""
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">
+                  <div className="flex items-start gap-2">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background">
                       {item.question_number}
                     </span>
-                    <div className="flex-1">
-                      <p className="text-sm leading-relaxed">{item.description}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs leading-relaxed">{item.description}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                           Peso {item.weight} | +{item.points_positive} / {item.points_negative}
                         </Badge>
                         {result?.is_conforming === true && (
-                          <Badge className="bg-success text-success-foreground">Conforme</Badge>
+                          <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0">Conforme</Badge>
                         )}
                         {result?.is_conforming === false && (
-                          <Badge variant="destructive">Não Conforme</Badge>
+                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Não Conforme</Badge>
                         )}
                       </div>
                       {result?.observations && (
-                        <div className="mt-2 rounded bg-destructive/10 p-2 text-xs text-destructive">
+                        <div className="mt-1.5 rounded bg-destructive/10 p-1.5 text-[10px] text-destructive">
                           <AlertCircle className="mr-1 inline h-3 w-3" />
                           {result.observations}
                         </div>
                       )}
                     </div>
-                    {isAdmin && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant={result?.is_conforming === true ? "default" : "outline"}
-                          className={result?.is_conforming === true ? "bg-success hover:bg-success/90 text-success-foreground" : ""}
-                          onClick={() => handleMark(item.id, true, item)}
-                        >
-                          OK
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={result?.is_conforming === false ? "destructive" : "outline"}
-                          onClick={() => handleMark(item.id, false, item)}
-                        >
-                          Irregular
-                        </Button>
-                      </div>
-                    )}
                   </div>
+                  {isAdmin && (
+                    <div className="flex gap-2 mt-2 pl-7">
+                      <Button
+                        size="sm"
+                        variant={result?.is_conforming === true ? "default" : "outline"}
+                        className={`h-7 text-xs px-3 ${result?.is_conforming === true ? "bg-success hover:bg-success/90 text-success-foreground" : ""}`}
+                        onClick={() => handleMark(item.id, true, item)}
+                      >
+                        OK
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={result?.is_conforming === false ? "destructive" : "outline"}
+                        className="h-7 text-xs px-3"
+                        onClick={() => handleMark(item.id, false, item)}
+                      >
+                        Irregular
+                      </Button>
+                    </div>
+                  )}
                 </div>
               );
             })}
