@@ -6,7 +6,7 @@ import logo from "@/assets/logo.png";
 import { LayoutDashboard, ClipboardList, BarChart3, LogOut, Settings, Building2, Users } from "lucide-react";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/logs", label: "Logs", icon: ClipboardList },
   { to: "/charts", label: "Evolução", icon: BarChart3 },
 ];
