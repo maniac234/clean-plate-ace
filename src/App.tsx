@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
+import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
 import Inspections from "@/pages/Inspections";
 import Logs from "@/pages/Logs";
@@ -28,14 +29,14 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 function AdminRoute({ children }: { children: ReactNode }) {
   const { isAdmin, loading } = useAuth();
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function AuthRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="flex min-h-screen items-center justify-center">Carregando...</div>;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -47,8 +48,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
             <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
