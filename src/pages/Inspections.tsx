@@ -217,14 +217,14 @@ export default function Inspections() {
             <CardTitle className="text-base">PADRÃO DE AVALIAÇÃO DO CHECK-LIST</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4 rounded-lg border p-4">
-              <span className="text-sm font-medium">Pontuação:</span>
-              <span className={`text-xl font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
+              <span className="text-xs font-medium">Pontuação:</span>
+              <span className={`text-lg font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
                 {totalScore}
               </span>
-              <span className="text-sm text-muted-foreground">/ {maxPossible} possíveis</span>
-              <span className="text-sm font-medium">({percentage}%)</span>
-              <Badge className={evaluationColor}>{evaluationLabel}</Badge>
+              <span className="text-xs text-muted-foreground">/ {maxPossible}</span>
+              <span className="text-xs font-medium">({percentage}%)</span>
+              <Badge className={`${evaluationColor} text-[10px] shrink-0`}>{evaluationLabel}</Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm sm:grid-cols-4">
