@@ -199,13 +199,15 @@ export default function Inspections() {
 
       {showNewVisit && (
         <Card>
-          <CardContent className="flex items-end gap-4 pt-4">
-            <div>
+          <CardContent className="flex flex-wrap items-end gap-3 pt-4">
+            <div className="min-w-0">
               <label className="text-sm font-medium">Data da Visita</label>
               <Input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
             </div>
-            <Button onClick={handleCreateVisit}>Criar</Button>
-            <Button variant="outline" onClick={() => setShowNewVisit(false)}>Cancelar</Button>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleCreateVisit}>Criar</Button>
+              <Button size="sm" variant="outline" onClick={() => setShowNewVisit(false)}>Cancelar</Button>
+            </div>
           </CardContent>
         </Card>
       )}
