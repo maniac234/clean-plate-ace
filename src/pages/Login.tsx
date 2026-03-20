@@ -28,7 +28,7 @@ const Login = () => {
         const { error } = await signIn(email, password);
         if (error) throw error;
       }
-      navigate("/");
+      navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Erro ao autenticar");
     } finally {
