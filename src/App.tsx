@@ -40,6 +40,13 @@ function AuthRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function HomeRoute({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="flex min-h-screen items-center justify-center">Carregando...</div>;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -48,7 +55,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
