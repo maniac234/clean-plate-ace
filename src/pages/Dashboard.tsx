@@ -16,14 +16,31 @@ import logo from "@/assets/logo.png";
 export default function Dashboard() {
   const { data: branches, isLoading: branchesLoading } = useBranches();
   const [selectedBranch, setSelectedBranch] = useState<string>("");
-  const { data: visits } = useVisits(selectedBranch);
+  const {
+    data: visitsData,
+    isLoading: visitsLoading,
+    isError: visitsError,
+  } = useVisits(selectedBranch);
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const latestVisit = visits?.[0];
-  const totalPositive = latestVisit?.total_score ?? 0;
-  const maxPossible = latestVisit?.max_possible_score ?? 0;
+  const visits = Array.isArray(visitsData) ? visitsData.filter(Boolean) : [];
+
+  const toSafeNumber = (value: unknown) => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const toSafeDate = (value?: string | null) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("pt-BR");
+  };
+
+  const latestVisit = visits[0];
+  const totalPositive = toSafeNumber(latestVisit?.total_score);
+  const maxPossible = toSafeNumber(latestVisit?.max_possible_score);
   const percentage = maxPossible > 0 ? Math.round((totalPositive / maxPossible) * 100) : 0;
 
   const handleDeleteVisit = async (visitId: string) => {
@@ -87,7 +104,19 @@ export default function Dashboard() {
         </div>
       )}
 
-      {selectedBranch && (
+      {selectedBranch && visitsLoading && (
+        <div className="flex h-40 items-center justify-center rounded-lg border border-dashed">
+          <p className="text-muted-foreground">Carregando inspeções...</p>
+        </div>
+      )}
+
+      {selectedBranch && visitsError && (
+        <div className="flex h-40 items-center justify-center rounded-lg border border-destructive/40 bg-destructive/5 px-4 text-center">
+          <p className="text-sm text-destructive">Erro ao carregar inspeções desta filial.</p>
+        </div>
+      )}
+
+      {selectedBranch && !visitsLoading && !visitsError && (
         <>
           {/* Score cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -97,9 +126,7 @@ export default function Dashboard() {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {latestVisit ? new Date(latestVisit.visit_date).toLocaleDateString("pt-BR") : "—"}
-                </div>
+                <div className="text-2xl font-bold">{toSafeDate(latestVisit?.visit_date)}</div>
               </CardContent>
             </Card>
             <Card>
@@ -130,7 +157,7 @@ export default function Dashboard() {
                 <XCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{visits?.length ?? 0}</div>
+                <div className="text-2xl font-bold">{visits.length}</div>
               </CardContent>
             </Card>
           </div>
@@ -141,42 +168,40 @@ export default function Dashboard() {
               <CardTitle>Últimas Inspeções</CardTitle>
             </CardHeader>
             <CardContent>
-              {!visits?.length ? (
+              {!visits.length ? (
                 <p className="text-sm text-muted-foreground">Nenhuma inspeção registrada</p>
               ) : (
                 <div className="space-y-2">
-                  {visits.slice(0, 5).map((v) => (
-                    <div key={v.id} className="flex items-center justify-between rounded-lg border p-3">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {new Date(v.visit_date).toLocaleDateString("pt-BR")}
-                        </p>
-                        {v.notes && (
-                          <p className="text-xs text-muted-foreground">{v.notes}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="text-sm font-bold">{v.total_score} pts</p>
-                          <p className="text-xs text-muted-foreground">
-                            {v.max_possible_score > 0
-                              ? `${Math.round((v.total_score / v.max_possible_score) * 100)}%`
-                              : "—"}
-                          </p>
+                  {visits.slice(0, 5).map((v) => {
+                    const score = toSafeNumber(v?.total_score);
+                    const max = toSafeNumber(v?.max_possible_score);
+                    const visitPercentage = max > 0 ? Math.round((score / max) * 100) : 0;
+
+                    return (
+                      <div key={v.id} className="flex items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="text-sm font-medium">{toSafeDate(v?.visit_date)}</p>
+                          {v?.notes && <p className="text-xs text-muted-foreground">{v.notes}</p>}
                         </div>
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                            onClick={() => handleDeleteVisit(v.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className="text-sm font-bold">{score} pts</p>
+                            <p className="text-xs text-muted-foreground">{max > 0 ? `${visitPercentage}%` : "—"}</p>
+                          </div>
+                          {isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteVisit(v.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
