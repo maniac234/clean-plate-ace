@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, full_name } = await req.json();
+    const { email, password, full_name, branch_id } = await req.json();
 
     if (!email || !password || !full_name) {
       return new Response(JSON.stringify({ error: "Email, senha e nome são obrigatórios" }), {
@@ -89,6 +89,11 @@ Deno.serve(async (req) => {
       user_id: newUser.user.id,
       role: "employee",
     });
+
+    // Update profile with branch if provided
+    if (branch_id) {
+      await adminClient.from("profiles").update({ branch_id }).eq("user_id", newUser.user.id);
+    }
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), {
       status: 200,

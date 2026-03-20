@@ -99,24 +99,35 @@ export type Database = {
       }
       profiles: {
         Row: {
+          branch_id: string | null
           created_at: string
           full_name: string | null
           id: string
           user_id: string
         }
         Insert: {
+          branch_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           user_id: string
         }
         Update: {
+          branch_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

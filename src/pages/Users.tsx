@@ -10,27 +10,40 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { Users as UsersIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+
+interface Branch {
+  id: string;
+  name: string;
+}
 
 interface UserRow {
   user_id: string;
   full_name: string | null;
   role: string;
+  branch_id: string | null;
+  branch_name: string | null;
 }
 
 export default function Users() {
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ full_name: "", email: "", password: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", password: "", branch_id: "" });
   const { isAdmin } = useAuth();
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name");
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, branch_id, branches:branch_id(name)");
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
 
     if (!profiles) { setLoading(false); return; }
@@ -38,15 +51,25 @@ export default function Users() {
     const roleMap = new Map<string, string>();
     roles?.forEach((r) => roleMap.set(r.user_id, r.role));
 
-    setUsers(profiles.map((p) => ({
+    setUsers(profiles.map((p: any) => ({
       user_id: p.user_id,
       full_name: p.full_name,
       role: roleMap.get(p.user_id) || "employee",
+      branch_id: p.branch_id,
+      branch_name: p.branches?.name || null,
     })));
     setLoading(false);
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  const fetchBranches = async () => {
+    const { data } = await supabase.from("branches").select("id, name").order("name");
+    if (data) setBranches(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchBranches();
+  }, []);
 
   const handleCreate = async () => {
     if (!form.full_name.trim() || !form.email.trim() || !form.password) {
@@ -74,6 +97,7 @@ export default function Users() {
             email: form.email.trim(),
             password: form.password,
             full_name: form.full_name.trim(),
+            branch_id: form.branch_id || null,
           }),
         }
       );
@@ -81,7 +105,7 @@ export default function Users() {
       if (!res.ok) throw new Error(result.error || "Erro ao criar conta");
 
       toast.success("Funcionário criado com sucesso!");
-      setForm({ full_name: "", email: "", password: "" });
+      setForm({ full_name: "", email: "", password: "", branch_id: "" });
       setOpen(false);
       fetchUsers();
     } catch (err: any) {
@@ -140,6 +164,24 @@ export default function Users() {
                     minLength={6}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Franquia</Label>
+                  <Select
+                    value={form.branch_id}
+                    onValueChange={(v) => setForm({ ...form, branch_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a franquia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <DialogFooter>
                 <Button onClick={handleCreate} disabled={creating} className="w-full">
@@ -161,6 +203,7 @@ export default function Users() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Franquia</TableHead>
                 <TableHead>Papel</TableHead>
               </TableRow>
             </TableHeader>
@@ -169,6 +212,9 @@ export default function Users() {
                 <TableRow key={u.user_id}>
                   <TableCell className="font-medium">
                     {u.full_name || "Sem nome"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {u.branch_name || "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={u.role === "admin" ? "default" : "secondary"}>
