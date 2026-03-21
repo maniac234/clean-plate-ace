@@ -91,7 +91,7 @@ export default function Dashboard() {
           </Select>
         </div>
         {isAdmin && selectedBranch && (
-          <Button size="sm" onClick={() => navigate("/inspections")}>
+          <Button size="sm" onClick={() => navigate(`/inspections?branch=${selectedBranch}`)}>
             <Plus className="mr-1 h-4 w-4" />
             Nova Inspeção
           </Button>
