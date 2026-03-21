@@ -58,9 +58,11 @@ export default function Inspections() {
   const { data: branches } = useBranches();
   const { data: categories } = useInspectionCategories();
   const { data: items } = useInspectionItems();
-  const [selectedBranch, setSelectedBranch] = useState("");
+  const [searchParams] = useSearchParams();
+  const branchFromUrl = searchParams.get("branch") || "";
+  const [selectedBranch, setSelectedBranch] = useState(branchFromUrl);
   const [selectedVisit, setSelectedVisit] = useState("");
-  const [showNewVisit, setShowNewVisit] = useState(false);
+  const [showNewVisit, setShowNewVisit] = useState(!!branchFromUrl);
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split("T")[0]);
   const [obsDialog, setObsDialog] = useState<{ itemId: string; obs: string } | null>(null);
 
