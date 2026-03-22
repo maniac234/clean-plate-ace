@@ -59,8 +59,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-          Painel Inicial - Checklist de supervisão dos requisitos de boas práticas
+        <h1 className="text-xl sm:text-2xl tracking-tight">
+          <span className="font-bold">Painel Inicial</span> - Checklist de supervisão dos requisitos de boas práticas
         </h1>
         <p className="text-sm text-muted-foreground">
           Auditor: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
