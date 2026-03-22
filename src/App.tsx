@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
 import LandingPage from "@/pages/LandingPage";
@@ -54,18 +55,20 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
-            <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
-            <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
-            <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
-            <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
-            <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
+              <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
+              <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
+              <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
+              <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
+              <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
