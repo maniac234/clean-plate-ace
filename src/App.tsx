@@ -55,20 +55,18 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
-              <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
-              <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
-              <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
-              <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
-              <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<ErrorBoundary><HomeRoute><LandingPage /></HomeRoute></ErrorBoundary>} />
+            <Route path="/login" element={<ErrorBoundary><AuthRoute><Login /></AuthRoute></ErrorBoundary>} />
+            <Route path="/dashboard" element={<ErrorBoundary><ProtectedRoute><Dashboard /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/inspections" element={<ErrorBoundary><ProtectedRoute><Inspections /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/logs" element={<ErrorBoundary><ProtectedRoute><Logs /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/charts" element={<ErrorBoundary><ProtectedRoute><Charts /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/branches" element={<ErrorBoundary><ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/users" element={<ErrorBoundary><ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/settings" element={<ErrorBoundary><ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute></ErrorBoundary>} />
+            <Route path="*" element={<ErrorBoundary><NotFound /></ErrorBoundary>} />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

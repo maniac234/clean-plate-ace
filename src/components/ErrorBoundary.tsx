@@ -23,8 +23,15 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return this.props.fallback ?? (
-        <div className="flex min-h-[200px] items-center justify-center p-4">
-          <p className="text-sm text-muted-foreground">Algo deu errado. Tente recarregar a página.</p>
+        <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 p-4 text-center">
+          <p className="text-sm text-muted-foreground">Algo deu errado. Tente novamente.</p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false })}
+            className="rounded-md border border-input px-3 py-1.5 text-sm text-foreground"
+          >
+            Tentar novamente
+          </button>
         </div>
       );
     }

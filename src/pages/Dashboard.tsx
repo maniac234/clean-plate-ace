@@ -70,18 +70,20 @@ export default function Dashboard() {
       {/* Branch selector + Nova Inspeção */}
       <div className="flex items-center gap-3">
         <div className="flex-1 max-w-xs">
-          <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma filial" />
-            </SelectTrigger>
-            <SelectContent>
-              {branches?.map((b) => (
-                <SelectItem key={b.id} value={b.id}>
+          <select
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <option value="">Selecione uma filial</option>
+            {(branches ?? [])
+              .filter((b) => Boolean(b?.id))
+              .map((b) => (
+                <option key={b.id} value={b.id}>
                   {b.name}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+          </select>
         </div>
         {isAdmin && selectedBranch && (
           <Button size="sm" onClick={() => navigate(`/inspections?branch=${selectedBranch}`)}>
