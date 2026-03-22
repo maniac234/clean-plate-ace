@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useBranches } from "@/hooks/useBranches";
 import { useVisits, useVisitResults } from "@/hooks/useInspections";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CalendarDays, Eye, CheckCircle, XCircle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { CalendarDays, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
 
 function VisitDetailsDialog({ visitId, open, onClose }: { visitId: string; open: boolean; onClose: () => void }) {
   const { data: results } = useVisitResults(visitId);
@@ -59,6 +64,22 @@ export default function Logs() {
   const [selectedBranch, setSelectedBranch] = useState("");
   const { data: visits } = useVisits(selectedBranch);
   const [detailVisitId, setDetailVisitId] = useState<string | null>(null);
+  const [deleteVisitId, setDeleteVisitId] = useState<string | null>(null);
+  const { isAdmin } = useAuth();
+  const qc = useQueryClient();
+
+  const handleDeleteVisit = async () => {
+    if (!deleteVisitId) return;
+    try {
+      await supabase.from("visit_results").delete().eq("visit_id", deleteVisitId);
+      await supabase.from("visits").delete().eq("id", deleteVisitId);
+      qc.invalidateQueries({ queryKey: ["visits"] });
+      toast.success("Inspeção excluída com sucesso");
+    } catch {
+      toast.error("Erro ao excluir inspeção");
+    }
+    setDeleteVisitId(null);
+  };
 
   const grouped = visits?.reduce<Record<string, typeof visits>>((acc, v) => {
     const d = new Date(v.visit_date);
@@ -120,6 +141,11 @@ export default function Logs() {
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDetailVisitId(v.id)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      {isAdmin && (
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => setDeleteVisitId(v.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -132,6 +158,23 @@ export default function Logs() {
       {detailVisitId && (
         <VisitDetailsDialog visitId={detailVisitId} open={!!detailVisitId} onClose={() => setDetailVisitId(null)} />
       )}
+
+      <AlertDialog open={!!deleteVisitId} onOpenChange={(o) => !o && setDeleteVisitId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir inspeção?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todos os resultados desta inspeção serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteVisit} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
