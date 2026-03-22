@@ -16,14 +16,6 @@ import Branches from "@/pages/Branches";
 import InspectionSettings from "@/pages/InspectionSettings";
 import UsersPage from "@/pages/Users";
 import NotFound from "./pages/NotFound";
-import Dashboard from "@/pages/Dashboard";
-import Inspections from "@/pages/Inspections";
-import Logs from "@/pages/Logs";
-import Charts from "@/pages/Charts";
-import Branches from "@/pages/Branches";
-import InspectionSettings from "@/pages/InspectionSettings";
-import UsersPage from "@/pages/Users";
-import NotFound from "./pages/NotFound";
 import { ReactNode } from "react";
 
 const queryClient = new QueryClient();
