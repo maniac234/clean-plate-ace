@@ -193,9 +193,9 @@ export default function Inspections() {
           </div>
         )}
 
-        {isAdmin && selectedBranch && (
-          <Button variant="outline" onClick={() => setShowNewVisit(true)}>
-            + Nova Visita
+        {isAdmin && selectedBranch && !showNewVisit && (
+          <Button variant="outline" size="sm" onClick={() => setShowNewVisit(true)}>
+            + Criar Visita
           </Button>
         )}
       </div>
