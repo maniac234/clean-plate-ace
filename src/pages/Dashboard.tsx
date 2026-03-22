@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, CheckCircle2, XCircle, TrendingUp, Plus, Trash2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+
 
 export default function Dashboard() {
   const { data: branches, isLoading: branchesLoading } = useBranches();
