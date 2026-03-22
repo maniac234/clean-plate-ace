@@ -55,18 +55,20 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
-            <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
-            <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
-            <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
-            <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
-            <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<HomeRoute><LandingPage /></HomeRoute>} />
+              <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
+              <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
+              <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
+              <Route path="/branches" element={<ProtectedRoute><AdminRoute><Branches /></AdminRoute></ProtectedRoute>} />
+              <Route path="/users" element={<ProtectedRoute><AdminRoute><UsersPage /></AdminRoute></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><AdminRoute><InspectionSettings /></AdminRoute></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
