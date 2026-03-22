@@ -180,7 +180,7 @@ export default function Inspections() {
           <div className="w-60">
             <Select value={selectedVisit} onValueChange={setSelectedVisit}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a visita" />
+                <SelectValue placeholder="Visitas realizadas" />
               </SelectTrigger>
               <SelectContent>
                 {visits?.map((v) => (
