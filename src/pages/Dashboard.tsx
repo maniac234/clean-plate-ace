@@ -58,20 +58,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <img src={logo} alt="Troppo Buono" className="h-12 object-contain" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              CHECK-LIST – Higiene Pessoal, Higiene das instalações, equipamentos e utensílios
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        Nutricionista Responsável: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+          Painel Inicial - Checklist de supervisão dos requisitos de boas práticas
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Auditor: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+        </p>
       </div>
 
       {/* Branch selector + Nova Inspeção */}
