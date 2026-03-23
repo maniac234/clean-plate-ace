@@ -7,7 +7,7 @@ import { LayoutDashboard, ClipboardList, BarChart3, LogOut, Settings, Building2,
 
 const navItems = [
   { to: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { to: "/logs", label: "Logs", icon: ClipboardList },
+  { to: "/logs", label: "Registros", icon: ClipboardList },
   { to: "/charts", label: "Evolução", icon: BarChart3 },
 ];
 
