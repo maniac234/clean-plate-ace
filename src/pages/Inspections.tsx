@@ -137,10 +137,17 @@ export default function Inspections() {
   };
 
   useEffect(() => {
-    if (!selectedVisit || !results || !items) return;
-    const totalScore = results.reduce((acc, r) => acc + (r.score ?? 0), 0);
-    const maxPossible = items.reduce((acc, i) => acc + i.points_positive, 0);
-    updateScore.mutate({ visitId: selectedVisit, totalScore, maxPossible });
+    if (!selectedVisit || !results || !items || totalWeight === 0) return;
+    // Calculate percentage: sum of conforming items' weight / totalWeight * 100
+    const conformingWeight = results.reduce((acc, r) => {
+      if (r.is_conforming) {
+        const item = items.find(i => i.id === r.inspection_item_id);
+        return acc + (item?.weight ?? 0);
+      }
+      return acc;
+    }, 0);
+    const pct = Math.round((conformingWeight / totalWeight) * 100);
+    updateScore.mutate({ visitId: selectedVisit, totalScore: pct, maxPossible: 100 });
   }, [results]);
 
   const groupedItems = categories?.map((cat) => ({
