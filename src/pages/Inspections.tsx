@@ -86,9 +86,18 @@ export default function Inspections() {
     }
   };
 
+  // Calculate total weight for percentage system
+  const totalWeight = items?.reduce((acc, i) => acc + i.weight, 0) ?? 0;
+
+  const getItemPercentage = (item: any) => {
+    if (totalWeight === 0) return 0;
+    return (item.weight / totalWeight) * 100;
+  };
+
   const handleMark = async (itemId: string, isConforming: boolean, item: any) => {
     if (!selectedVisit || !isAdmin) return;
-    const score = isConforming ? item.points_positive : item.points_negative;
+    const pctValue = getItemPercentage(item);
+    const score = isConforming ? Math.round(pctValue * 100) : 0; // store as integer (pct * 100)
 
     if (!isConforming) {
       setObsDialog({ itemId, obs: resultMap.get(itemId)?.observations ?? "" });
