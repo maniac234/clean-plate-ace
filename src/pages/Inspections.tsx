@@ -155,9 +155,15 @@ export default function Inspections() {
     items: items?.filter((i) => i.category_id === cat.id) ?? [],
   }));
 
-  const totalScore = results?.reduce((a, r) => a + (r.score ?? 0), 0) ?? 0;
-  const maxPossible = items?.reduce((a, i) => a + i.points_positive, 0) ?? 0;
-  const percentage = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
+  // Percentage based on conforming weight
+  const conformingWeight = results?.reduce((acc, r) => {
+    if (r.is_conforming) {
+      const item = items?.find(i => i.id === r.inspection_item_id);
+      return acc + (item?.weight ?? 0);
+    }
+    return acc;
+  }, 0) ?? 0;
+  const percentage = totalWeight > 0 ? Math.round((conformingWeight / totalWeight) * 100) : 0;
   const evaluationLabel = getEvaluation(percentage);
   const evaluationColor = getEvaluationColor(evaluationLabel);
 
