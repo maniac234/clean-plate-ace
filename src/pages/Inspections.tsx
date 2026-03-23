@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+
 
 const EVALUATION_SCALE = [
   { min: 100, label: "EXCELENTE" },
