@@ -301,9 +301,9 @@ export default function Inspections() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs leading-relaxed">{item.description}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                          Peso {item.weight} | +{item.points_positive} / {item.points_negative}
-                        </Badge>
+                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                           Peso {item.weight} | {(getItemPercentage(item)).toFixed(1)}%
+                         </Badge>
                         {result?.is_conforming === true && (
                           <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0">Conforme</Badge>
                         )}
