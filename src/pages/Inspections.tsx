@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+
 
 const EVALUATION_SCALE = [
   { min: 100, label: "EXCELENTE" },
@@ -86,9 +86,18 @@ export default function Inspections() {
     }
   };
 
+  // Calculate total weight for percentage system
+  const totalWeight = items?.reduce((acc, i) => acc + i.weight, 0) ?? 0;
+
+  const getItemPercentage = (item: any) => {
+    if (totalWeight === 0) return 0;
+    return (item.weight / totalWeight) * 100;
+  };
+
   const handleMark = async (itemId: string, isConforming: boolean, item: any) => {
     if (!selectedVisit || !isAdmin) return;
-    const score = isConforming ? item.points_positive : item.points_negative;
+    const pctValue = getItemPercentage(item);
+    const score = isConforming ? Math.round(pctValue * 100) : 0; // store as integer (pct * 100)
 
     if (!isConforming) {
       setObsDialog({ itemId, obs: resultMap.get(itemId)?.observations ?? "" });
@@ -117,7 +126,7 @@ export default function Inspections() {
         visit_id: selectedVisit,
         inspection_item_id: obsDialog.itemId,
         is_conforming: false,
-        score: item.points_negative,
+        score: 0,
         observations: obsDialog.obs,
       });
       setObsDialog(null);
@@ -128,10 +137,17 @@ export default function Inspections() {
   };
 
   useEffect(() => {
-    if (!selectedVisit || !results || !items) return;
-    const totalScore = results.reduce((acc, r) => acc + (r.score ?? 0), 0);
-    const maxPossible = items.reduce((acc, i) => acc + i.points_positive, 0);
-    updateScore.mutate({ visitId: selectedVisit, totalScore, maxPossible });
+    if (!selectedVisit || !results || !items || totalWeight === 0) return;
+    // Calculate percentage: sum of conforming items' weight / totalWeight * 100
+    const conformingWeight = results.reduce((acc, r) => {
+      if (r.is_conforming) {
+        const item = items.find(i => i.id === r.inspection_item_id);
+        return acc + (item?.weight ?? 0);
+      }
+      return acc;
+    }, 0);
+    const pct = Math.round((conformingWeight / totalWeight) * 100);
+    updateScore.mutate({ visitId: selectedVisit, totalScore: pct, maxPossible: 100 });
   }, [results]);
 
   const groupedItems = categories?.map((cat) => ({
@@ -139,26 +155,27 @@ export default function Inspections() {
     items: items?.filter((i) => i.category_id === cat.id) ?? [],
   }));
 
-  const totalScore = results?.reduce((a, r) => a + (r.score ?? 0), 0) ?? 0;
-  const maxPossible = items?.reduce((a, i) => a + i.points_positive, 0) ?? 0;
-  const percentage = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
+  // Percentage based on conforming weight
+  const conformingWeight = results?.reduce((acc, r) => {
+    if (r.is_conforming) {
+      const item = items?.find(i => i.id === r.inspection_item_id);
+      return acc + (item?.weight ?? 0);
+    }
+    return acc;
+  }, 0) ?? 0;
+  const percentage = totalWeight > 0 ? Math.round((conformingWeight / totalWeight) * 100) : 0;
   const evaluationLabel = getEvaluation(percentage);
   const evaluationColor = getEvaluationColor(evaluationLabel);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <img src={logo} alt="Troppo Buono" className="h-10 object-contain" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inspeções</h1>
-          <p className="text-xs text-muted-foreground">
-            CHECK-LIST – Higiene Pessoal, Higiene das instalações, equipamentos e utensílios, etapas operacionais, preenchimento das planilhas de controle e Controle de pragas
-          </p>
-        </div>
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        Nutricionista Responsável: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-xl sm:text-2xl tracking-tight">
+          <span className="font-bold">Painel Inicial</span> - Checklist de supervisão dos requisitos de boas práticas
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Auditor: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+        </p>
       </div>
 
       {/* Selectors */}
@@ -223,12 +240,10 @@ export default function Inspections() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
-              <span className="text-xs font-medium">Pontuação:</span>
-              <span className={`text-lg font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
-                {totalScore}
+              <span className="text-xs font-medium">Conformidade:</span>
+              <span className={`text-lg font-bold ${percentage >= 70 ? "text-success" : "text-destructive"}`}>
+                {percentage}%
               </span>
-              <span className="text-xs text-muted-foreground">/ {maxPossible}</span>
-              <span className="text-xs font-medium">({percentage}%)</span>
               <Badge className={`${evaluationColor} text-[10px] shrink-0`}>{evaluationLabel}</Badge>
             </div>
 
@@ -286,9 +301,9 @@ export default function Inspections() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs leading-relaxed">{item.description}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                          Peso {item.weight} | +{item.points_positive} / {item.points_negative}
-                        </Badge>
+                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                           Peso {item.weight} | {(getItemPercentage(item)).toFixed(1)}%
+                         </Badge>
                         {result?.is_conforming === true && (
                           <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0">Conforme</Badge>
                         )}
