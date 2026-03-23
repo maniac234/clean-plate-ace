@@ -126,7 +126,7 @@ export default function Inspections() {
         visit_id: selectedVisit,
         inspection_item_id: obsDialog.itemId,
         is_conforming: false,
-        score: item.points_negative,
+        score: 0,
         observations: obsDialog.obs,
       });
       setObsDialog(null);
