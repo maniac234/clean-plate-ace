@@ -169,18 +169,13 @@ export default function Inspections() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <img src={logo} alt="Troppo Buono" className="h-10 object-contain" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inspeções</h1>
-          <p className="text-xs text-muted-foreground">
-            CHECK-LIST – Higiene Pessoal, Higiene das instalações, equipamentos e utensílios, etapas operacionais, preenchimento das planilhas de controle e Controle de pragas
-          </p>
-        </div>
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        Nutricionista Responsável: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-xl sm:text-2xl tracking-tight">
+          <span className="font-bold">Painel Inicial</span> - Checklist de supervisão dos requisitos de boas práticas
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Auditor: <span className="font-medium text-foreground">Rosani Sommer Bertão</span>
+        </p>
       </div>
 
       {/* Selectors */}
