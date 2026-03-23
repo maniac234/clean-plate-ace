@@ -240,12 +240,10 @@ export default function Inspections() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
-              <span className="text-xs font-medium">Pontuação:</span>
-              <span className={`text-lg font-bold ${totalScore >= 0 ? "text-success" : "text-destructive"}`}>
-                {totalScore}
+              <span className="text-xs font-medium">Conformidade:</span>
+              <span className={`text-lg font-bold ${percentage >= 70 ? "text-success" : "text-destructive"}`}>
+                {percentage}%
               </span>
-              <span className="text-xs text-muted-foreground">/ {maxPossible}</span>
-              <span className="text-xs font-medium">({percentage}%)</span>
               <Badge className={`${evaluationColor} text-[10px] shrink-0`}>{evaluationLabel}</Badge>
             </div>
 
