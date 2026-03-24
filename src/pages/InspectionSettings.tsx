@@ -92,15 +92,14 @@ export default function InspectionSettings() {
             maxLength={500}
           />
           <div className="flex gap-3">
-            <Select value={newWeight} onValueChange={setNewWeight}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Peso 1</SelectItem>
-                <SelectItem value="2">Peso 2</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={newWeight}
+              onChange={(e) => setNewWeight(e.target.value)}
+              className="h-10 w-32 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="1">Peso 1</option>
+              <option value="2">Peso 2</option>
+            </select>
             <Button onClick={handleAdd}>
               <Plus className="mr-1 h-4 w-4" />
               Adicionar
