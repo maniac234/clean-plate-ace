@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { formatDateBR } from "@/lib/dateUtils";
 
 
 const EVALUATION_SCALE = [
@@ -137,18 +138,22 @@ export default function Inspections() {
   };
 
   useEffect(() => {
-    if (!selectedVisit || !results || !items || totalWeight === 0) return;
+    if (!selectedVisit || !results || !items || items.length === 0 || totalWeight === 0) return;
+    // Only update if there are results
+    if (results.length === 0) return;
+    
     // Calculate percentage: sum of conforming items' weight / totalWeight * 100
-    const conformingWeight = results.reduce((acc, r) => {
+    const cw = results.reduce((acc, r) => {
       if (r.is_conforming) {
         const item = items.find(i => i.id === r.inspection_item_id);
         return acc + (item?.weight ?? 0);
       }
       return acc;
     }, 0);
-    const pct = Math.round((conformingWeight / totalWeight) * 100);
+    const pct = Math.round((cw / totalWeight) * 100);
     updateScore.mutate({ visitId: selectedVisit, totalScore: pct, maxPossible: 100 });
-  }, [results]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results, items, totalWeight, selectedVisit]);
 
   const groupedItems = categories?.map((cat) => ({
     ...cat,
@@ -202,7 +207,7 @@ export default function Inspections() {
               <SelectContent>
                 {visits?.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
-                    {new Date(v.visit_date).toLocaleDateString("pt-BR")}
+                    {formatDateBR(v.visit_date)}
                   </SelectItem>
                 ))}
               </SelectContent>
