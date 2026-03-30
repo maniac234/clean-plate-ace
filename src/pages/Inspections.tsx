@@ -203,7 +203,7 @@ export default function Inspections() {
               <SelectContent>
                 {visits?.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
-                    {new Date(v.visit_date).toLocaleDateString("pt-BR")}
+                    {formatDateBR(v.visit_date)}
                   </SelectItem>
                 ))}
               </SelectContent>
