@@ -33,11 +33,7 @@ export default function Dashboard() {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
-  const toSafeDate = (value?: string | null) => {
-    if (!value) return "—";
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("pt-BR");
-  };
+  const toSafeDate = (value?: string | null) => formatDateBR(value);
 
   const latestVisit = visits[0];
   const totalPositive = toSafeNumber(latestVisit?.total_score);

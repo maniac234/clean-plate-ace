@@ -132,7 +132,7 @@ export default function Logs() {
                     <div className="flex items-center gap-2 min-w-0">
                       <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-xs font-medium">
-                        {new Date(v.visit_date).toLocaleDateString("pt-BR")}
+                        {formatDateBR(v.visit_date)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
