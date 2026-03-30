@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { formatDateBR } from "@/lib/dateUtils";
 
 
 const EVALUATION_SCALE = [
