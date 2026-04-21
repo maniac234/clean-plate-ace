@@ -15,15 +15,20 @@ export function useInspectionCategories() {
   });
 }
 
-export function useInspectionItems() {
+export function useInspectionItems(includeInactive = false) {
   return useQuery({
-    queryKey: ["inspection_items"],
+    queryKey: ["inspection_items", includeInactive],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("inspection_items")
         .select("*, inspection_categories(name)")
-        .eq("is_active", true)
         .order("sort_order");
+      
+      if (!includeInactive) {
+        query = query.eq("is_active", true);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
