@@ -78,7 +78,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Ticker bar */}
-      <div className="overflow-hidden bg-foreground text-background py-1.5">
+      <div className="overflow-hidden bg-background border-b text-foreground py-1.5">
         <div className="animate-marquee whitespace-nowrap text-xs font-medium tracking-wide">
           {"🍽️ CONTROLE DE QUALIDADE ALIMENTAR    ⚡ INSPEÇÕES PROFISSIONAIS    "
             .repeat(8)}
@@ -104,14 +104,14 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-foreground text-background">
+      <section className="relative overflow-hidden bg-background text-foreground border-b">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--success)/0.15),transparent_70%)]" />
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center md:py-32">
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl">
             Controle de qualidade com{" "}
             <span className="text-[hsl(var(--success))]">precisão total</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-background/70 md:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-lg">
             O sistema completo para inspeção de higiene e segurança alimentar.
             Check-list, relatórios, gráficos e gestão de múltiplas filiais — tudo em um só lugar, 100% online.
           </p>
@@ -192,12 +192,12 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-foreground text-background py-16 md:py-24">
+      <section className="bg-background text-foreground py-16 md:py-24 border-t">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
             Pronto para elevar o padrão de qualidade?
           </h2>
-          <p className="mt-3 text-sm text-background/70 md:text-base">
+          <p className="mt-3 text-sm text-muted-foreground md:text-base">
             Comece agora a digitalizar suas inspeções e tenha controle total sobre a higiene e segurança das suas unidades.
           </p>
           <Button
