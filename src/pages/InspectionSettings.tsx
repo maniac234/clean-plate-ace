@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 export default function InspectionSettings() {
   const { data: categories } = useInspectionCategories();
-  const { data: items } = useInspectionItems();
+  const { data: items } = useInspectionItems(true);
   const qc = useQueryClient();
 
   const [newDesc, setNewDesc] = useState("");
